@@ -2,10 +2,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
-import Home from './pages/Home.jsx';
-import Catalogo from './pages/Catalogo.jsx';
-import Carrito from './pages/Carrito.jsx';
-import Login from './pages/Login.jsx';
+import Home from './pages/Home';
+import Catalogo from './pages/Catalogo';
+import Carrito from './pages/Carrito';
+import Login from './pages/Login';
+import ProtectedRoute from './components/Common/ProtectedRoute';
 
 function App() {
   return (
@@ -14,10 +15,19 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalogo />} />
-          <Route path="/carrito" element={<Carrito />} />
           <Route path="/login" element={<Login />} />
           
-          {/* Ruta 404 para manejar URLs no encontradas */}
+          {/* Ruta protegida */}
+          <Route 
+            path="/carrito" 
+            element={
+              <ProtectedRoute>
+                <Carrito />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Ruta 404 */}
           <Route path="*" element={
             <div className="container text-center" style={{ padding: '4rem 1rem' }}>
               <h2>Página no encontrada</h2>

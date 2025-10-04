@@ -79,9 +79,13 @@ Una plataforma de e-commerce especializada en plantas, desarrollada como **pre-e
 ## Reflexiones finales
 
 ### ¿Qué ventajas tiene usar Context API frente a pasar props entre componentes?
+- Hace el código más mantenible y limpio, es ventajoso para datos que son necesitados por varios componentes y evita tener que pasar por otros componentes (o lo que comúnmente llaman "prop drilling")
 
 ### ¿En qué situaciones sería más conveniente usar Redux en lugar de Context API?
+- Para proyectos más grandes, seguramente sea más útil. En este proyecto tiene sólo AuthProvider y CartProvider y la plataforma no necesita tener los datos tan en tiempo real como podria ser otro tipo de e-commerce o negocio.
 
 ### ¿Qué problemas podrías enfrentar al manejar múltiples contextos en una misma aplicación?
+- Las matrioshkas interminables de contextos...además imagino que se debe de volver más complejo debuggear.
 
 ### ¿Cómo podrías optimizar el rendimiento de una aplicación que usa Context API intensivamente?
+- Se podria separar contexts, usar useMemo para valores del context, separar state y dispatch, usar custom hooks selectores...
