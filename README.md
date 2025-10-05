@@ -2,7 +2,7 @@
 
 ![El Brote Verde](https://img.shields.io/badge/El%20Brote%20Verde-E--commerce-brightgreen)
 ![TalentoTech](https://img.shields.io/badge/TalentoTech-Pre--Entrega-success)
-![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react)
+![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)
 ![Status](https://img.shields.io/badge/Status-🚀%20En%20Desarrollo-yellow)
 
 Una plataforma de e-commerce especializada en plantas, desarrollada como **pre-entrega** para TalentoTech.
