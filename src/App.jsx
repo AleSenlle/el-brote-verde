@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Catalogo from './pages/Catalogo';
 import Carrito from './pages/Carrito';
 import Login from './pages/Login';
+import AdminProducts from './pages/AdminProducts'; // NUEVO
 import ProtectedRoute from './components/Common/ProtectedRoute';
 
 function App() {
@@ -17,12 +18,22 @@ function App() {
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/login" element={<Login />} />
           
-          {/* Ruta protegida */}
+          {/* Ruta protegida - Carrito */}
           <Route 
             path="/carrito" 
             element={
               <ProtectedRoute>
                 <Carrito />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* NUEVO: Ruta protegida de administración */}
+          <Route 
+            path="/admin/products" 
+            element={
+              <ProtectedRoute>
+                <AdminProducts />
               </ProtectedRoute>
             } 
           />

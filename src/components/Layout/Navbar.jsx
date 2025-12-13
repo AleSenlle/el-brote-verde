@@ -1,147 +1,214 @@
 // src/components/Layout/Navbar.jsx
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext'; // ← Importa useAuth
+import { useAuth } from '../../context/AuthContext';
+import CartWidget from '../Cart/CartWidget'; // IMPORTAR CartWidget
+import { 
+  FiHome, 
+  FiGrid, 
+  FiUser, 
+  FiLogOut,
+  FiLogIn,
+  FiPackage
+} from 'react-icons/fi';
+import styled from 'styled-components';
+
+const Header = styled.header`
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const NavContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const Logo = styled(Link)`
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #166534;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    color: #15803d;
+  }
+`;
+
+const LogoIcon = styled.span`
+  font-size: 1.8rem;
+`;
+
+const Nav = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+`;
+
+const NavLink = styled(Link)`
+  color: ${props => props.active ? '#166534' : '#6b7280'};
+  text-decoration: none;
+  font-weight: ${props => props.active ? '600' : '400'};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 6px;
+  
+  &:hover {
+    color: #166534;
+    background-color: #f0fdf4;
+  }
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+`;
+
+const UserName = styled.span`
+  color: #166534;
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const LogoutButton = styled.button`
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background-color: #b91c1c;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+`;
+
+const LoginButton = styled(Link)`
+  background-color: #166534;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background-color: #15803d;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.4rem 1rem;
+    font-size: 0.875rem;
+  }
+`;
 
 const Navbar = () => {
-  const { totalItems } = useCart();
-  const { isAuthenticated, user, logout } = useAuth(); // ← Usa useAuth
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
-    <header style={{
-      backgroundColor: 'white',
-      borderBottom: '1px solid #e5e7eb',
-      padding: '1rem 0',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100
-    }}>
-      <div className="container" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+    <Header>
+      <NavContainer>
         {/* Logo */}
-        <Link 
-          to="/" 
-          style={{
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            color: '#166534',
-            textDecoration: 'none'
-          }}
-        >
+        <Logo to="/">
+          <LogoIcon>🌿</LogoIcon>
           El Brote Verde
-        </Link>
+        </Logo>
 
         {/* Navegación */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <Link 
-            to="/" 
-            style={{
-              color: location.pathname === '/' ? '#166534' : '#6b7280',
-              textDecoration: 'none',
-              fontWeight: location.pathname === '/' ? '600' : '400'
-            }}
-          >
-            Inicio
-          </Link>
-          <Link 
-            to="/catalogo" 
-            style={{
-              color: location.pathname === '/catalogo' ? '#166534' : '#6b7280',
-              textDecoration: 'none',
-              fontWeight: location.pathname === '/catalogo' ? '600' : '400'
-            }}
-          >
-            Catálogo
-          </Link>
+        <Nav>
+          <NavLink to="/" active={location.pathname === '/'}>
+            <FiHome />
+            <span>Inicio</span>
+          </NavLink>
+          
+          <NavLink to="/catalogo" active={location.pathname === '/catalogo'}>
+            <FiGrid />
+            <span>Catálogo</span>
+          </NavLink>
           
           {/* Carrito - Solo mostrar si está autenticado */}
-          {isAuthenticated && (
-            <Link 
-              to="/carrito" 
-              style={{ 
-                position: 'relative', 
-                color: '#6b7280', 
-                textDecoration: 'none',
-                padding: '0.5rem'
-              }}
-            >
-              🛒
-              {totalItems > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-5px',
-                  right: '-5px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  fontSize: '0.7rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-          )}
+          {isAuthenticated && <CartWidget />}
 
-          {/* Mostrar estado de autenticación */}
+          {/* Estado de autenticación */}
           {isAuthenticated ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span style={{ 
-                color: '#166534', 
-                fontWeight: '500',
-                fontSize: '0.875rem'
-              }}>
+            <UserInfo>
+              <UserName>
+                <FiUser />
                 Hola, {user?.name || 'Usuario'}
-              </span>
-              <button
-                onClick={logout}
-                style={{
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#b91c1c'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#dc2626'}
-              >
-                Cerrar Sesión
-              </button>
-            </div>
+              </UserName>
+              
+              {/* Enlace a administración si es admin */}
+              {user?.role === 'admin' && (
+                <NavLink to="/admin/products" active={location.pathname.includes('/admin')}>
+                  <FiPackage />
+                  <span>Agregar a Catálogo</span>
+                </NavLink>
+              )}
+              
+              <LogoutButton onClick={handleLogout}>
+                <FiLogOut />
+                <span>Cerrar Sesión</span>
+              </LogoutButton>
+            </UserInfo>
           ) : (
-            <Link 
-              to="/login"
-              style={{
-                backgroundColor: '#166534',
-                color: 'white',
-                padding: '0.5rem 1.5rem',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontWeight: '500',
-                transition: 'background-color 0.2s ease'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#15803d'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#166534'}
-            >
-              Iniciar Sesión
-            </Link>
+            <LoginButton to="/login">
+              <FiLogIn />
+              <span>Iniciar Sesión</span>
+            </LoginButton>
           )}
-        </nav>
-      </div>
-    </header>
+        </Nav>
+      </NavContainer>
+    </Header>
   );
 };
 

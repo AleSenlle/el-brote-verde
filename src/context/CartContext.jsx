@@ -1,18 +1,40 @@
 // src/context/CartContext.jsx
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
-// Crear el Context
 const CartContext = createContext();
 
-// Estado inicial del carrito
 const initialState = {
   cartItems: [],
   totalAmount: 0,
   totalItems: 0,
 };
 
-// Reducer para manejar las acciones del carrito
+// Cargar carrito desde localStorage
+const loadCartFromStorage = () => {
+  try {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      return JSON.parse(savedCart);
+    }
+  } catch (error) {
+    console.error('Error loading cart from storage:', error);
+  }
+  return initialState;
+};
+
+// Guardar carrito en localStorage
+const saveCartToStorage = (state) => {
+  try {
+    localStorage.setItem('cart', JSON.stringify(state));
+  } catch (error) {
+    console.error('Error saving cart to storage:', error);
+  }
+};
+
 const cartReducer = (state, action) => {
+  let newState;
+  
   switch (action.type) {
     case 'ADD_TO_CART':
       const existingItemIndex = state.cartItems.findIndex(
@@ -22,26 +44,22 @@ const cartReducer = (state, action) => {
       let updatedItems;
 
       if (existingItemIndex !== -1) {
-        // Si el item ya existe, aumentar la cantidad
         updatedItems = state.cartItems.map((item, index) =>
           index === existingItemIndex
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        // Si es un item nuevo, agregarlo al carrito
         updatedItems = [...state.cartItems, { ...action.payload, quantity: 1 }];
       }
 
-      const newTotalAmount = state.totalAmount + action.payload.price;
-      const newTotalItems = state.totalItems + 1;
-
-      return {
+      newState = {
         ...state,
         cartItems: updatedItems,
-        totalAmount: parseFloat(newTotalAmount.toFixed(2)),
-        totalItems: newTotalItems,
+        totalAmount: parseFloat((state.totalAmount + action.payload.price).toFixed(2)),
+        totalItems: state.totalItems + 1,
       };
+      break;
 
     case 'REMOVE_FROM_CART':
       const itemToRemove = state.cartItems.find(item => item.id === action.payload);
@@ -50,12 +68,13 @@ const cartReducer = (state, action) => {
       const removedAmount = itemToRemove ? itemToRemove.price * itemToRemove.quantity : 0;
       const removedItems = itemToRemove ? itemToRemove.quantity : 0;
 
-      return {
+      newState = {
         ...state,
         cartItems: filteredItems,
         totalAmount: parseFloat((state.totalAmount - removedAmount).toFixed(2)),
         totalItems: state.totalItems - removedItems,
       };
+      break;
 
     case 'UPDATE_QUANTITY':
       const updatedCartItems = state.cartItems.map(item =>
@@ -72,26 +91,42 @@ const cartReducer = (state, action) => {
         total + item.quantity, 0
       );
 
-      return {
+      newState = {
         ...state,
         cartItems: updatedCartItems,
         totalAmount: parseFloat(newTotal.toFixed(2)),
         totalItems: newItemsCount,
       };
+      break;
 
     case 'CLEAR_CART':
-      return initialState;
+      newState = initialState;
+      break;
+
+    case 'LOAD_CART':
+      newState = action.payload;
+      break;
 
     default:
       return state;
   }
+
+  // Guardar en localStorage después de cada cambio
+  saveCartToStorage(newState);
+  return newState;
 };
 
-// Provider Component
 export const CartProvider = ({ children }) => {
   const [cartState, dispatch] = useReducer(cartReducer, initialState);
 
-  // Acciones del carrito
+  // Cargar carrito desde localStorage al iniciar
+  useEffect(() => {
+    const savedCart = loadCartFromStorage();
+    if (savedCart.cartItems.length > 0) {
+      dispatch({ type: 'LOAD_CART', payload: savedCart });
+    }
+  }, []);
+
   const addToCart = (plant) => {
     dispatch({ 
       type: 'ADD_TO_CART', 
@@ -104,10 +139,15 @@ export const CartProvider = ({ children }) => {
         family: plant.family
       }
     });
+    
+    toast.success(`${plant.common_name} agregado al carrito!`, {
+      icon: '🛒'
+    });
   };
 
   const removeFromCart = (plantId) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: plantId });
+    toast.info('Producto removido del carrito');
   };
 
   const updateQuantity = (plantId, quantity) => {
@@ -125,21 +165,32 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
+    if (cartState.cartItems.length === 0) {
+      toast.info('El carrito ya está vacío');
+      return;
+    }
+    
+    if (window.confirm('¿Estás seguro de vaciar el carrito?')) {
+      dispatch({ type: 'CLEAR_CART' });
+      toast.success('Carrito vaciado correctamente');
+    }
   };
 
-  // Calcular costo de envío (mock)
   const calculateShipping = () => {
-    return cartState.totalAmount > 50 ? 0 : 10; // Envío gratis sobre $50
+    return cartState.totalAmount > 50 ? 0 : 10;
   };
 
-  // Calcular total final
   const calculateTotal = () => {
     const shipping = calculateShipping();
     return parseFloat((cartState.totalAmount + shipping).toFixed(2));
   };
 
-  // Valor que se proveerá a los componentes
+  // Obtener cantidad específica de un producto
+  const getItemQuantity = (plantId) => {
+    const item = cartState.cartItems.find(item => item.id === plantId);
+    return item ? item.quantity : 0;
+  };
+
   const value = {
     cartItems: cartState.cartItems,
     totalAmount: cartState.totalAmount,
@@ -149,7 +200,8 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     clearCart,
     calculateShipping,
-    calculateTotal
+    calculateTotal,
+    getItemQuantity
   };
 
   return (
@@ -159,7 +211,6 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// Hook personalizado para usar el Context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
