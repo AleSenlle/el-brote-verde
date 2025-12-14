@@ -8,12 +8,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/src/assets/:path*",
-      "destination": "/:path*",
-      "permanent": true
-    }
   ]
 }

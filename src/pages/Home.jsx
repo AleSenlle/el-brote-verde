@@ -8,6 +8,7 @@ import StepCard from '../components/Home/StepCard';
 import { useProducts } from '../context/ProductContext';
 import { formatPrice } from '../utils/formatters';
 import '../styles/home.css';
+import heroImage from '../assets/FondoHome.png';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Home = () => {
           {/* Background Image con Fade Overlay */}
           <div className="hero-background">
             <img
-              src="/src/assets/FondoHome.png"
+              src={heroImage}
               alt="Bosque verde"
               className="hero-image"
               onError={(e) => {
