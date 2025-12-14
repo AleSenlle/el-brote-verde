@@ -5,11 +5,14 @@ import PlantList from '../components/Plant/PlantList';
 import SearchBar from '../components/Common/SearchBar';
 import Pagination from '../components/Common/Pagination';
 import SEO from '../components/Layout/SEO';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
 import styled from 'styled-components';
 import { useProducts } from '../context/ProductContext';
 import usePlants from '../hooks/usePlants';
 import useSearch from '../hooks/useSearch';
 import usePagination from '../hooks/usePagination';
+import { useNextPagePreloader, useItemsImagePreloader } from '../hooks/useImagePreloader';
+import { PAGINATION_CONFIG } from '../utils/constants';
 
 const Container = styled.div`
   padding: 2rem 1rem;
@@ -130,15 +133,16 @@ const Catalogo = () => {
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [itemsPerPage, setItemsPerPage] = useState(9);
   const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Usar hook de búsqueda con plantas combinadas
+
+  // Usar hook de búsqueda con plantas combinadas, pasando initialSearch para evitar el delay
   const {
     searchTerm: currentSearch,
     filteredItems: searchedPlants,
     handleSearch,
+    handleSearchImmediate,
     clearSearch,
     hasSearch
-  } = useSearch(plants, ['common_name', 'scientific_name', 'family', 'description']);
+  } = useSearch(plants, ['common_name', 'scientific_name', 'family', 'description'], initialSearch);
   
   // Usar hook de paginación
   const {
@@ -152,14 +156,27 @@ const Catalogo = () => {
     handlePageChange,
     handlePageSizeChange
   } = usePagination(searchedPlants, itemsPerPage);
-  
+
+  // Pre-cargar imágenes de la página actual
+  useItemsImagePreloader(
+    paginatedItems,
+    (plant) => plant?.image_url || plant?.image,
+    !plantsLoading
+  );
+
+  // Pre-cargar imágenes de la siguiente página para navegación fluida
+  useNextPagePreloader(
+    searchedPlants,
+    currentPage,
+    itemsPerPage,
+    (plant) => plant?.image_url || plant?.image
+  );
+
   // Sincronizar búsqueda inicial desde URL
   useEffect(() => {
-    if (initialSearch) {
-      handleSearch(initialSearch);
-    }
+    // Solo marcar como inicializado, el hook ya recibe initialSearch
     setIsInitialized(true);
-  }, [initialSearch]);
+  }, []);
   
   // Actualizar URL cuando cambia la búsqueda
   useEffect(() => {
@@ -201,21 +218,11 @@ const Catalogo = () => {
     handlePageSizeChange(value);
   };
   
-  if (productsLoading) {
+  // Mostrar loading mientras cargan productos o plantas
+  if (productsLoading || plantsLoading) {
     return (
       <Container>
-        <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-          <div style={{
-            border: '2px solid #e5e7eb',
-            borderTop: '2px solid #166534',
-            borderRadius: '50%',
-            width: '4rem',
-            height: '4rem',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }}></div>
-          <p style={{ color: '#6b7280' }}>Cargando catálogo...</p>
-        </div>
+        <LoadingSpinner message="Cargando catálogo..." />
       </Container>
     );
   }
@@ -272,10 +279,9 @@ const Catalogo = () => {
                 cursor: 'pointer'
               }}
             >
-              <option value="6">6 plantas</option>
-              <option value="9">9 plantas</option>
-              <option value="12">12 plantas</option>
-              <option value="24">24 plantas</option>
+              {PAGINATION_CONFIG.PAGE_SIZE_OPTIONS.map(size => (
+                <option key={size} value={size}>{size} plantas</option>
+              ))}
             </select>
           </div>          {/* Información de resultados */}
           {totalPlants > 0 && (
@@ -339,6 +345,7 @@ const Catalogo = () => {
                   itemsPerPage={pageSize}
                   totalItems={totalPlants}
                   showInfo={true}
+                  itemLabel="plantas"
                 />
               </div>
             )}

@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/Layout/SEO';
 import SearchBar from '../components/Common/SearchBar';
+import FeatureCard from '../components/Home/FeatureCard';
+import StepCard from '../components/Home/StepCard';
 import { useProducts } from '../context/ProductContext';
+import { formatPrice } from '../utils/formatters';
 import '../styles/home.css';
 
 const Home = () => {
@@ -133,89 +136,23 @@ const Home = () => {
               marginTop: '3rem',
               padding: '0 1rem'
             }}>
-              <div style={{
-                textAlign: 'center',
-                padding: '2rem',
-                background: 'white',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-5px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-              >
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '1rem'
-                }}>🌱</div>
-                <h3 style={{
-                  color: '#166534',
-                  marginBottom: '0.5rem'
-                }}>Calidad Garantizada</h3>
-                <p style={{
-                  color: '#6b7280',
-                  fontSize: '0.875rem',
-                  lineHeight: '1.5'
-                }}>
-                  Todas nuestras plantas son cultivadas con cuidado y amor, asegurando la mejor calidad y salud para tu hogar.
-                </p>
-              </div>
-              
-              <div style={{
-                textAlign: 'center',
-                padding: '2rem',
-                background: 'white',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-5px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-              >
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '1rem'
-                }}>🚚</div>
-                <h3 style={{
-                  color: '#166534',
-                  marginBottom: '0.5rem'
-                }}>Envío Rápido</h3>
-                <p style={{
-                  color: '#6b7280',
-                  fontSize: '0.875rem',
-                  lineHeight: '1.5'
-                }}>
-                  Entregamos tus plantas en perfecto estado en 24-48 horas. Envío gratis en compras mayores a $50.
-                </p>
-              </div>
-              
-              <div style={{
-                textAlign: 'center',
-                padding: '2rem',
-                background: 'white',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseOver={(e) => e.target.style.transform = 'translateY(-5px)'}
-              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-              >
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '1rem'
-                }}>💚</div>
-                <h3 style={{
-                  color: '#166534',
-                  marginBottom: '0.5rem'
-                }}>Soporte Experto</h3>
-                <p style={{
-                  color: '#6b7280',
-                  fontSize: '0.875rem',
-                  lineHeight: '1.5'
-                }}>
-                  Nuestros expertos en jardinería te asesoran para que tus plantas crezcan saludables y fuertes.
-                </p>
-              </div>
+              <FeatureCard
+                icon="🌱"
+                title="Calidad Garantizada"
+                description="Todas nuestras plantas son cultivadas con cuidado y amor, asegurando la mejor calidad y salud para tu hogar."
+              />
+
+              <FeatureCard
+                icon="🚚"
+                title="Envío Rápido"
+                description="Entregamos tus plantas en perfecto estado en 24-48 horas. Envío gratis en compras mayores a $50."
+              />
+
+              <FeatureCard
+                icon="💚"
+                title="Soporte Experto"
+                description="Nuestros expertos en jardinería te asesoran para que tus plantas crezcan saludables y fuertes."
+              />
             </div>
             
             {/* Cómo funciona */}
@@ -247,89 +184,23 @@ const Home = () => {
                 maxWidth: '800px',
                 margin: '0 auto'
               }}>
-                <div>
-                  <div style={{
-                    background: '#dcfce7',
-                    color: '#166534',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    margin: '0 auto 1rem',
-                    fontWeight: 'bold'
-                  }}>1</div>
-                  <h4 style={{ 
-                    color: '#1f2937', 
-                    marginBottom: '0.5rem',
-                    fontSize: '1.125rem'
-                  }}>Explora el catálogo</h4>
-                  <p style={{ 
-                    color: '#6b7280', 
-                    fontSize: '0.875rem',
-                    lineHeight: '1.5'
-                  }}>
-                    Navega por nuestra amplia selección de plantas y encuentra la perfecta para ti.
-                  </p>
-                </div>
-                
-                <div>
-                  <div style={{
-                    background: '#dcfce7',
-                    color: '#166534',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    margin: '0 auto 1rem',
-                    fontWeight: 'bold'
-                  }}>2</div>
-                  <h4 style={{ 
-                    color: '#1f2937', 
-                    marginBottom: '0.5rem',
-                    fontSize: '1.125rem'
-                  }}>Realiza el pedido</h4>
-                  <p style={{ 
-                    color: '#6b7280', 
-                    fontSize: '0.875rem',
-                    lineHeight: '1.5'
-                  }}>
-                    Agrega al carrito y completa el proceso de compra de forma segura y sencilla.
-                  </p>
-                </div>
-                
-                <div>
-                  <div style={{
-                    background: '#dcfce7',
-                    color: '#166534',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    margin: '0 auto 1rem',
-                    fontWeight: 'bold'
-                  }}>3</div>
-                  <h4 style={{ 
-                    color: '#1f2937', 
-                    marginBottom: '0.5rem',
-                    fontSize: '1.125rem'
-                  }}>Recibe tu planta</h4>
-                  <p style={{ 
-                    color: '#6b7280', 
-                    fontSize: '0.875rem',
-                    lineHeight: '1.5'
-                  }}>
-                    Recibe tu planta en casa lista para ser cuidada y disfrutada.
-                  </p>
-                </div>
+                <StepCard
+                  number="1"
+                  title="Explora el catálogo"
+                  description="Navega por nuestra amplia selección de plantas y encuentra la perfecta para ti."
+                />
+
+                <StepCard
+                  number="2"
+                  title="Realiza el pedido"
+                  description="Agrega al carrito y completa el proceso de compra de forma segura y sencilla."
+                />
+
+                <StepCard
+                  number="3"
+                  title="Recibe tu planta"
+                  description="Recibe tu planta en casa lista para ser cuidada y disfrutada."
+                />
               </div>
             </div>
 
@@ -410,7 +281,7 @@ const Home = () => {
                       color: '#166534',
                       fontWeight: '600',
                       fontSize: '0.875rem'
-                    }}>${typeof product.price === 'string' ? parseFloat(product.price).toFixed(2) : product.price.toFixed(2)}</p>
+                    }}>${formatPrice(product.price)}</p>
                   </div>
                 ))}
               </div>

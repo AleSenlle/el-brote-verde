@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/Layout/SEO';
-import { 
-  FiShoppingCart, 
-  FiTrash2, 
-  FiPlus, 
-  FiMinus, 
+import {
+  FiShoppingCart,
+  FiTrash2,
+  FiPlus,
+  FiMinus,
   FiArrowLeft,
   FiCreditCard,
   FiTruck,
@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import { formatPrice, formatPriceWithCurrency } from '../utils/formatters';
 
 const Container = styled.div`
   padding: 2rem 1rem;
@@ -565,7 +566,7 @@ const Carrito = () => {
                       <FamilyBadge>{item.family}</FamilyBadge>
                     </ProductInfo>
 
-                    <PriceColumn>${item.price.toFixed(2)}</PriceColumn>
+                    <PriceColumn>${formatPrice(item.price)}</PriceColumn>
 
                     <QuantityControls>
                       <QuantityButton 
@@ -585,7 +586,7 @@ const Carrito = () => {
                     </QuantityControls>
 
                     <TotalColumn>
-                      <ItemTotal>${(item.price * item.quantity).toFixed(2)}</ItemTotal>
+                      <ItemTotal>${formatPrice(item.price * item.quantity)}</ItemTotal>
                       <DeleteButton 
                         onClick={() => removeFromCart(item.id)}
                         title="Eliminar producto"
@@ -609,9 +610,9 @@ const Carrito = () => {
             <div>
               <SummaryRow>
                 <SummaryLabel>Productos ({totalItems})</SummaryLabel>
-                <SummaryValue>${totalAmount.toFixed(2)}</SummaryValue>
+                <SummaryValue>${formatPrice(totalAmount)}</SummaryValue>
               </SummaryRow>
-              
+
               <SummaryRow>
                 <SummaryLabel>
                   <FiTruck style={{ marginRight: '0.5rem' }} />
@@ -621,7 +622,7 @@ const Carrito = () => {
                   {shippingCost === 0 ? (
                     <span style={{ color: '#166534', fontWeight: '600' }}>Gratis</span>
                   ) : (
-                    `$${shippingCost.toFixed(2)}`
+                    formatPriceWithCurrency(shippingCost)
                   )}
                 </SummaryValue>
               </SummaryRow>
@@ -637,7 +638,7 @@ const Carrito = () => {
               
               <TotalRow>
                 <TotalLabel>Total</TotalLabel>
-                <TotalAmount>${finalTotal.toFixed(2)}</TotalAmount>
+                <TotalAmount>${formatPrice(finalTotal)}</TotalAmount>
               </TotalRow>
             </div>
 

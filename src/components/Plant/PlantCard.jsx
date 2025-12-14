@@ -2,14 +2,23 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { 
-  FiShoppingCart, 
-  FiStar, 
-  FiPackage, 
+import {
+  FiShoppingCart,
+  FiStar,
   FiTag,
   FiPlus
 } from 'react-icons/fi';
 import styled from 'styled-components';
+import { formatPrice } from '../../utils/formatters';
+import {
+  canAddToCart,
+  getAddButtonTooltip,
+  getAddButtonAriaLabel,
+  getAddButtonText,
+  getStarCounts
+} from '../../utils/plantHelpers';
+import StockBadge from '../Common/StockBadge';
+import OptimizedImage from '../Common/OptimizedImage';
 
 const Card = styled.div`
   background: white;
@@ -55,32 +64,13 @@ const ToastMessage = styled.div`
 
 const ImageContainer = styled.div`
   height: 200px;
-  background-color: #f3f4f6;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-  
+
   &:hover img {
     transform: scale(1.05);
   }
-`;
-
-const PlaceholderImage = styled.div`
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #166534;
-  font-size: 3rem;
 `;
 
 const CardContent = styled.div`
@@ -134,19 +124,6 @@ const FamilyTag = styled.span`
   align-items: center;
   gap: 0.5rem;
   border: 1px solid #e5e7eb;
-`;
-
-const StockTag = styled.span`
-  background-color: ${props => props.inStock ? '#dcfce7' : '#fef2f2'};
-  color: ${props => props.inStock ? '#166534' : '#dc2626'};
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid ${props => props.inStock ? '#bbf7d0' : '#fecaca'};
 `;
 
 const RatingContainer = styled.div`
@@ -268,34 +245,14 @@ const PlantCard = ({ plant }) => {
 
       {/* Imagen de la planta */}
       <ImageContainer>
-         {(plant.image_url || plant.image) ? (
-          <img 
-            src={plant.image_url || plant.image} 
-            alt={plant.common_name || plant.name}
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.parentElement.innerHTML = `
-                <div style="
-                  width: 100%;
-                  height: 100%;
-                  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  color: #166534;
-                ">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-              `;
-            }}
-          />
-        ) : (
-          <PlaceholderImage>
-            <FiPackage size={48} />
-          </PlaceholderImage>
-        )}
+        <OptimizedImage
+          src={plant.image_url || plant.image}
+          webpSrc={plant.image_webp || plant.image_url_webp}
+          blurSrc={plant.blur_image || plant.tiny_image}
+          alt={plant.common_name || plant.name}
+          placeholderIcon="🌿"
+          lazy={true}
+        />
       </ImageContainer>
 
       {/* Información de la planta */}
@@ -310,46 +267,41 @@ const PlantCard = ({ plant }) => {
             <FiTag size={12} />
             {plant.family || 'Familia no especificada'}
           </FamilyTag>
-          <StockTag inStock={plant.inStock}>
-            <FiPackage size={12} />
-            {plant.inStock ? 'En stock' : 'Sin stock'}
-          </StockTag>
+          <StockBadge inStock={plant.inStock} variant="pill" icon="package" />
         </TagsContainer>
 
         {/* Rating */}
         <RatingContainer>
           <Stars>
-            {'★'.repeat(Math.floor(plant.rating || 0))}
-            {'☆'.repeat(5 - Math.floor(plant.rating || 0))}
+            {(() => {
+              const { filled, empty } = getStarCounts(plant.rating);
+              return '★'.repeat(filled) + '☆'.repeat(empty);
+            })()}
           </Stars>
           <RatingText>({plant.rating?.toFixed(1) || '0.0'})</RatingText>
         </RatingContainer>
 
         {/* Precio y botón */}
         <PriceContainer>
-          <Price>{plant.price?.toFixed(2) || '0.00'}</Price>
+          <Price>{formatPrice(plant.price)}</Price>
           
           <AddButton
             onClick={handleAddToCart}
-            disabled={!plant.inStock || isAdding || !isAuthenticated}
+            disabled={!canAddToCart(plant.inStock, isAdding, isAuthenticated)}
             inStock={plant.inStock && isAuthenticated}
-            title={!isAuthenticated ? 'Inicia sesión para comprar' : !plant.inStock ? 'Producto sin stock' : 'Agregar al carrito'}
-            aria-label={!isAuthenticated ? 'Inicia sesión para comprar' : !plant.inStock ? 'Producto sin stock' : `Agregar ${plant.common_name} al carrito`}
+            title={getAddButtonTooltip(isAuthenticated, plant.inStock)}
+            aria-label={getAddButtonAriaLabel(isAuthenticated, plant.inStock, plant.common_name)}
           >
-            {!isAuthenticated ? (
-              'Inicia sesión'
-            ) : isAdding ? (
-              'Agregando...'
-            ) : !plant.inStock ? (
-              'Sin stock'
-            ) : currentQuantity > 0 ? (
-              `Agregar (${currentQuantity})`
-            ) : (
-              <>
-                <FiPlus />
-                Agregar
-              </>
-            )}
+            {(() => {
+              const buttonText = getAddButtonText(isAuthenticated, isAdding, plant.inStock, currentQuantity);
+              if (buttonText) return buttonText;
+              return (
+                <>
+                  <FiPlus />
+                  Agregar
+                </>
+              );
+            })()}
           </AddButton>
         </PriceContainer>
       </CardContent>

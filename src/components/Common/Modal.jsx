@@ -1,7 +1,7 @@
 // src/components/Common/Modal.jsx
 import React from 'react';
-import { FiX } from 'react-icons/fi';
 import styled from 'styled-components';
+import { FiX } from 'react-icons/fi';
 
 const ModalOverlay = styled.div`
   position: fixed;

@@ -47,9 +47,9 @@ const usePlants = () => {
         rating: parseFloat((Math.random() * 2 + 3).toFixed(1)),
         source: 'trefle'
       })).filter(plant => plant.common_name !== 'Planta sin nombre común');
-      
+
     } catch (trefleError) {
-      console.warn('Trefle no disponible, usando solo MockAPI:', trefleError.message);
+      // Trefle no disponible, usando solo MockAPI
       return [];
     }
   };
@@ -77,52 +77,38 @@ const usePlants = () => {
     const loadPlants = async () => {
       // Si los productos de MockAPI aún están cargando, esperar
       if (productsLoading) {
-        console.log('⏳ Esperando que carguen productos de MockAPI...');
         return;
       }
 
       setLoading(true);
       setError(null);
-      
+
       try {
-        console.log('🔍 Iniciando carga combinada...');
-        console.log('📊 Productos de MockAPI listos:', mockProducts?.length || 0);
-        
         // 1. Plantas de MockAPI (siempre)
         const mockPlants = convertMockProductsToPlants(mockProducts || []);
-        console.log('🛒 Plantas de MockAPI:', mockPlants.length);
-        
+
         // 2. Intentar cargar Trefle (solo si no estamos en admin)
         let treflePlants = [];
         const isAdminPage = window.location.pathname.includes('/admin');
-        
+
         if (!isAdminPage) {
           try {
-            console.log('🌐 Intentando conectar con Trefle API...');
             treflePlants = await fetchTreflePlants();
-            console.log('✅ Trefle cargado:', treflePlants.length, 'plantas');
           } catch (error) {
-            console.warn('⚠️ Error con Trefle, continuando sin él');
+            // Error con Trefle, continuando sin él
           }
         }
-        
+
         // 3. Combinar (MockAPI primero, luego Trefle)
         const allPlants = [...mockPlants, ...treflePlants];
-        
-        console.log('🌿 TOTAL FINAL:', allPlants.length, 'plantas');
-        console.log('📊 Origen:', {
-          mockapi: mockPlants.length,
-          trefle: treflePlants.length
-        });
-        
+
         if (allPlants.length === 0) {
           setError('No se pudieron cargar plantas de ninguna fuente');
         } else {
           setPlants(allPlants);
         }
-        
+
       } catch (err) {
-        console.error('❌ Error general al cargar plantas:', err);
         setError('Error al cargar las plantas. ' + err.message);
       } finally {
         setLoading(false);

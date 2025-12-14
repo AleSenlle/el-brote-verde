@@ -14,6 +14,7 @@ import {
   FiGlobe
 } from 'react-icons/fi';
 import styled from 'styled-components';
+import { validateProduct, isValidUrl } from '../../utils/productValidation';
 
 const Form = styled.form`
   max-width: 600px;
@@ -222,68 +223,8 @@ const ProductForm = ({ product, onClose, onSubmitSuccess }) => {
     }
   }, [formData.image]);
 
-  const validate = () => {
-    const newErrors = {};
-    
-    // Validación de nombre (OBLIGATORIO)
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre del producto es requerido';
-    } else if (formData.name.length < 3) {
-      newErrors.name = 'El nombre debe tener al menos 3 caracteres';
-    }
-    
-    // Validación de nombre científico (OBLIGATORIO)
-    if (!formData.scientific_name.trim()) {
-      newErrors.scientific_name = 'El nombre científico es requerido';
-    } else if (formData.scientific_name.length < 3) {
-      newErrors.scientific_name = 'El nombre científico debe tener al menos 3 caracteres';
-    }
-    
-    // Validación de familia (OBLIGATORIO)
-    if (!formData.family.trim()) {
-      newErrors.family = 'La familia botánica es requerida';
-    } else if (formData.family.length < 3) {
-      newErrors.family = 'La familia debe tener al menos 3 caracteres';
-    }
-    
-    // Validación de precio (OBLIGATORIO)
-    if (!formData.price) {
-      newErrors.price = 'El precio es requerido';
-    } else if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
-      newErrors.price = 'El precio debe ser un número mayor a 0';
-    }
-    
-    // Validación de imagen (OBLIGATORIO)
-    if (!formData.image.trim()) {
-      newErrors.image = 'La URL de la imagen es requerida';
-    } else if (!isValidUrl(formData.image)) {
-      newErrors.image = 'Ingresa una URL válida (debe comenzar con http:// o https://)';
-    } else if (!isImageUrl(formData.image)) {
-      newErrors.image = 'La URL debe apuntar a una imagen (jpg, png, gif, webp)';
-    }
-    
-    // Validación de descripción (OPCIONAL, pero si se llena, mínimo 10 caracteres)
-    if (formData.description.trim() && formData.description.length < 10) {
-      newErrors.description = 'La descripción debe tener al menos 10 caracteres (o dejarla vacía)';
-    }
-    
-    return newErrors;
-  };
-
-  const isValidUrl = (url) => {
-    try {
-      new URL(url);
-      return url.startsWith('http://') || url.startsWith('https://');
-    } catch {
-      return false;
-    }
-  };
-
-  const isImageUrl = (url) => {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-    const urlLower = url.toLowerCase();
-    return imageExtensions.some(ext => urlLower.includes(ext));
-  };
+  // Utiliza la función de validación del módulo de utilidades
+  const validate = () => validateProduct(formData);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

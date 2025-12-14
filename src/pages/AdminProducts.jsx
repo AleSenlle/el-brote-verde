@@ -7,11 +7,14 @@ import SEO from '../components/Layout/SEO';
 import ProductForm from '../components/Product/ProductForm';
 import DeleteModal from '../components/Product/DeleteModal';
 import Modal from '../components/Common/Modal';
-import { 
-  FiPackage, 
-  FiEdit2, 
-  FiTrash2, 
-  FiPlus, 
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import StockBadge from '../components/Common/StockBadge';
+import { formatPrice } from '../utils/formatters';
+import {
+  FiPackage,
+  FiEdit2,
+  FiTrash2,
+  FiPlus,
   FiSearch,
   FiFilter,
   FiDollarSign,
@@ -241,18 +244,6 @@ const ProductDetails = styled.div`
   color: #6b7280;
 `;
 
-const StockStatus = styled.span`
-  background-color: ${props => props.inStock ? '#dcfce7' : '#fef2f2'};
-  color: ${props => props.inStock ? '#166534' : '#dc2626'};
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
-
 const Rating = styled.div`
   display: flex;
   align-items: center;
@@ -306,12 +297,6 @@ const EmptyIcon = styled.div`
   margin-bottom: 1rem;
 `;
 
-const LoadingContainer = styled.div`
-  text-align: center;
-  padding: 3rem;
-  color: #6b7280;
-`;
-
 const AdminProducts = () => {
   const { 
     filteredProducts, 
@@ -325,7 +310,7 @@ const AdminProducts = () => {
   } = useProducts();
   
   const { user, isAdmin } = useAuth();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -378,18 +363,7 @@ const AdminProducts = () => {
   if (loading) {
     return (
       <Container>
-        <LoadingContainer>
-          <div className="spinner" style={{
-            border: '2px solid #e5e7eb',
-            borderTop: '2px solid #166534',
-            borderRadius: '50%',
-            width: '4rem',
-            height: '4rem',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }}></div>
-          <p>Cargando productos...</p>
-        </LoadingContainer>
+        <LoadingSpinner message="Cargando productos..." />
       </Container>
     );
   }
@@ -501,7 +475,7 @@ const AdminProducts = () => {
                       <ProductName>{product.name}</ProductName>
                       <ProductPrice>
                         <FiDollarSign size={16} />
-                        {parseFloat(product.price).toFixed(2)}
+                        {formatPrice(product.price)}
                       </ProductPrice>
                     </ProductHeader>
                     
@@ -517,10 +491,7 @@ const AdminProducts = () => {
                     )}
                     
                     <ProductDetails>
-                      <StockStatus inStock={product.inStock}>
-                        {product.inStock ? <FiCheck /> : <FiX />}
-                        {product.inStock ? 'En stock' : 'Sin stock'}
-                      </StockStatus>
+                      <StockBadge inStock={product.inStock} />
                       
                       <Rating>
                         {'★'.repeat(Math.floor(product.rating || 0))}

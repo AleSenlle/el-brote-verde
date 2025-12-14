@@ -3,6 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiSearch, FiX } from 'react-icons/fi';
 import styled from 'styled-components';
 import { debounce } from 'lodash';
+import { SEARCH_CONFIG } from '../../utils/constants';
+import { formatPrice } from '../../utils/formatters';
 
 const SearchContainer = styled.div`
   position: relative;
@@ -133,13 +135,13 @@ const NoResults = styled.div`
   color: #6b7280;
 `;
 
-const SearchBar = ({ 
-  onSearch, 
+const SearchBar = ({
+  onSearch,
   onSubmit,
   placeholder = "Buscar plantas...",
   products = [],
   showResults = true,
-  debounceTime = 300,
+  debounceTime = SEARCH_CONFIG.DEBOUNCE_TIME,
   showSubmitButton = false,
   initialValue = ''
 }) => {
@@ -269,7 +271,7 @@ const SearchBar = ({
               <ResultName>{product.common_name || product.name}</ResultName>
               <ResultDetails>
                 <span>{product.scientific_name}</span>
-                <span>${product.price?.toFixed(2)}</span>
+                <span>${formatPrice(product.price)}</span>
               </ResultDetails>
             </ResultItem>
           ))}

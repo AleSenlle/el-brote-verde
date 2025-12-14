@@ -62,7 +62,8 @@ const Pagination = ({
   onPageChange,
   itemsPerPage = 10,
   totalItems = 0,
-  showInfo = true
+  showInfo = true,
+  itemLabel = 'productos'
 }) => {
   const maxVisibleButtons = 5;
   
@@ -167,7 +168,16 @@ const Pagination = ({
       {/* Información de página */}
       {showInfo && totalItems > 0 && (
         <PageInfo>
-          Mostrando {startItem}-{endItem} de {totalItems} productos
+          {startItem === 1 && endItem === totalItems ? (
+            // Si mostramos todos los items en una sola página
+            `${totalItems} ${itemLabel}`
+          ) : endItem === totalItems ? (
+            // Si estamos en la última página mostrando items finales
+            `${startItem}-${endItem} ${itemLabel}`
+          ) : (
+            // Páginas intermedias
+            `Mostrando ${startItem}-${endItem} de ${totalItems} ${itemLabel}`
+          )}
         </PageInfo>
       )}
     </PaginationContainer>

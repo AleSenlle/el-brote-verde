@@ -1,6 +1,7 @@
 // src/context/CartContext.jsx
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { CART_CONFIG } from '../utils/constants';
 
 const CartContext = createContext();
 
@@ -15,7 +16,15 @@ const loadCartFromStorage = () => {
   try {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      return JSON.parse(savedCart);
+      const parsed = JSON.parse(savedCart);
+      // Validar que el carrito tenga la estructura esperada
+      if (parsed && Array.isArray(parsed.cartItems)) {
+        return {
+          cartItems: parsed.cartItems || [],
+          totalAmount: parsed.totalAmount || 0,
+          totalItems: parsed.totalItems || 0,
+        };
+      }
     }
   } catch (error) {
     console.error('Error loading cart from storage:', error);
@@ -37,6 +46,11 @@ const cartReducer = (state, action) => {
   
   switch (action.type) {
     case 'ADD_TO_CART':
+      // Validar que el producto tenga los campos necesarios
+      if (!action.payload || !action.payload.id || !action.payload.price) {
+        return state;
+      }
+
       const existingItemIndex = state.cartItems.findIndex(
         item => item.id === action.payload.id
       );
@@ -46,7 +60,7 @@ const cartReducer = (state, action) => {
       if (existingItemIndex !== -1) {
         updatedItems = state.cartItems.map((item, index) =>
           index === existingItemIndex
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: (item.quantity || 0) + 1 }
             : item
         );
       } else {
@@ -56,7 +70,7 @@ const cartReducer = (state, action) => {
       newState = {
         ...state,
         cartItems: updatedItems,
-        totalAmount: parseFloat((state.totalAmount + action.payload.price).toFixed(2)),
+        totalAmount: parseFloat((state.totalAmount + (action.payload.price || 0)).toFixed(CART_CONFIG.DECIMAL_PLACES)),
         totalItems: state.totalItems + 1,
       };
       break;
@@ -65,13 +79,13 @@ const cartReducer = (state, action) => {
       const itemToRemove = state.cartItems.find(item => item.id === action.payload);
       const filteredItems = state.cartItems.filter(item => item.id !== action.payload);
 
-      const removedAmount = itemToRemove ? itemToRemove.price * itemToRemove.quantity : 0;
-      const removedItems = itemToRemove ? itemToRemove.quantity : 0;
+      const removedAmount = itemToRemove ? (itemToRemove.price || 0) * (itemToRemove.quantity || 0) : 0;
+      const removedItems = itemToRemove ? (itemToRemove.quantity || 0) : 0;
 
       newState = {
         ...state,
         cartItems: filteredItems,
-        totalAmount: parseFloat((state.totalAmount - removedAmount).toFixed(2)),
+        totalAmount: parseFloat((state.totalAmount - removedAmount).toFixed(CART_CONFIG.DECIMAL_PLACES)),
         totalItems: state.totalItems - removedItems,
       };
       break;
@@ -83,18 +97,18 @@ const cartReducer = (state, action) => {
           : item
       );
 
-      const newTotal = updatedCartItems.reduce((total, item) => 
-        total + (item.price * item.quantity), 0
+      const newTotal = updatedCartItems.reduce((total, item) =>
+        total + ((item?.price || 0) * (item?.quantity || 0)), 0
       );
-      
-      const newItemsCount = updatedCartItems.reduce((total, item) => 
-        total + item.quantity, 0
+
+      const newItemsCount = updatedCartItems.reduce((total, item) =>
+        total + (item?.quantity || 0), 0
       );
 
       newState = {
         ...state,
         cartItems: updatedCartItems,
-        totalAmount: parseFloat(newTotal.toFixed(2)),
+        totalAmount: parseFloat(newTotal.toFixed(CART_CONFIG.DECIMAL_PLACES)),
         totalItems: newItemsCount,
       };
       break;
@@ -177,12 +191,12 @@ export const CartProvider = ({ children }) => {
   };
 
   const calculateShipping = () => {
-    return cartState.totalAmount > 50 ? 0 : 10;
+    return cartState.totalAmount > CART_CONFIG.FREE_SHIPPING_THRESHOLD ? 0 : CART_CONFIG.SHIPPING_COST;
   };
 
   const calculateTotal = () => {
     const shipping = calculateShipping();
-    return parseFloat((cartState.totalAmount + shipping).toFixed(2));
+    return parseFloat((cartState.totalAmount + shipping).toFixed(CART_CONFIG.DECIMAL_PLACES));
   };
 
   // Obtener cantidad específica de un producto

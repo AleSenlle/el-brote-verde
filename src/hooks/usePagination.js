@@ -1,7 +1,8 @@
 // src/hooks/usePagination.js
 import { useState, useMemo, useEffect } from 'react';
+import { PAGINATION_CONFIG } from '../utils/constants';
 
-const usePagination = (items = [], itemsPerPage = 10) => {
+const usePagination = (items = [], itemsPerPage = PAGINATION_CONFIG.DEFAULT_ITEMS_PER_PAGE) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(itemsPerPage);
   
