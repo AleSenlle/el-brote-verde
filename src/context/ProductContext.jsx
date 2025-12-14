@@ -1,4 +1,4 @@
-// src/context/ProductContext.jsx
+// src/context/ProductContext.jsx - VERSIÓN COMPLETA CORREGIDA
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,6 +10,12 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Agregar los estados que faltan
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   // Obtener productos desde MockAPI
   const fetchProducts = useCallback(async (page = 1, limit = 10) => {
@@ -28,7 +34,15 @@ export const ProductProvider = ({ children }) => {
       });
 
       setProducts(response.data);
+      setCurrentPage(page);
       
+      // Calcular total de páginas si la API devuelve información de paginación
+      if (response.headers['x-total-count']) {
+        const totalItems = parseInt(response.headers['x-total-count']);
+        setTotalPages(Math.ceil(totalItems / limit));
+      }
+      
+      console.log('✅ Productos cargados:', response.data.length);
       return { success: true, data: response.data };
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Error al cargar productos';
@@ -147,8 +161,37 @@ export const ProductProvider = ({ children }) => {
   };
 
   // Filtrar por familia
-  const filterByCategory = (family) => {
-    setSelectedCategory(family);
+  const filterByCategory = (category) => {
+    setSelectedCategory(category);
+  };
+
+  // Obtener productos filtrados
+  const getFilteredProducts = () => {
+    let filtered = [...products];
+
+    // Aplicar búsqueda
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(product =>
+        product.name?.toLowerCase().includes(term) ||
+        product.scientific_name?.toLowerCase().includes(term) ||
+        product.description?.toLowerCase().includes(term) ||
+        product.family?.toLowerCase().includes(term)
+      );
+    }
+
+    // Aplicar filtro de familia
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(product => product.family === selectedCategory);
+    }
+
+    return filtered;
+  };
+
+  // Obtener familias únicas para filtros
+  const getCategories = () => {
+    const families = [...new Set(products.map(p => p.family).filter(Boolean))];
+    return ['all', ...families.sort()];
   };
 
   // Cargar productos al iniciar
@@ -158,12 +201,21 @@ export const ProductProvider = ({ children }) => {
 
   const value = {
     products,
+    filteredProducts: getFilteredProducts(),
     loading,
     error,
+    currentPage,
+    totalPages,
+    searchTerm,
+    selectedCategory,
+    categories: getCategories(),
     fetchProducts,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    searchProducts,
+    filterByCategory,
+    setCurrentPage
   };
 
   return (
